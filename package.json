@@ -1,0 +1,19 @@
+{
+  "name": "cradle-file-emitter",
+  "version": "1.0.0",
+  "description": "Base Cradle File Emitter.",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gatewayapps/cradle-file-emitter.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gatewayapps/cradle-file-emitter/issues"
+  },
+  "homepage": "https://github.com/gatewayapps/cradle-file-emitter#readme"
+}
