@@ -14,10 +14,11 @@ export abstract class FileEmitter extends CradleEmitterBase {
   public options: FileEmitterOptionsArgs
   public outputType: 'singleFile' | 'oneFilePerModel'
 
-  constructor(options: FileEmitterOptionsArgs, _console: IConsole) {
-    super(options, _console)
+  constructor(options: FileEmitterOptionsArgs, output: string, _console: IConsole) {
+    super(options, output, _console)
+
     this.options = options
-    this.outputType = this.options.output.toLowerCase().includes('{{name}}')
+    this.outputType = this.output.toLowerCase().includes('{{name}}')
       ? 'oneFilePerModel'
       : 'singleFile'
   }
@@ -25,13 +26,15 @@ export abstract class FileEmitter extends CradleEmitterBase {
   private ModelFileContents: (ModelFileContents)[] = []
 
   public async emitSchema(schema: CradleSchema) {
-    schema.Models.forEach(async (model) => {
-      const contents = await this.getContentsForModel(model)
-      this.ModelFileContents.push({ model, contents })
-    })
+    await Promise.all(
+      schema.Models.map(async (model) => {
+        const contents = await this.getContentsForModel(model)
+        this.ModelFileContents.push({ model, contents })
+      })
+    )
 
     if (this.outputType === 'oneFilePerModel') {
-      this.ModelFileContents.forEach(async (modelContents) => {
+      this.ModelFileContents.forEach((modelContents) => {
         this.writeModelContentsToDisk(modelContents)
       })
     } else {
@@ -60,8 +63,8 @@ export abstract class FileEmitter extends CradleEmitterBase {
   protected getFilePathForModel(model: CradleModel) {
     const actualOutput =
       this.outputType === 'oneFilePerModel'
-        ? this.options.output.replace('{{Name}}', model.Name)
-        : this.options.output
+        ? this.output.replace('{{Name}}', model.Name)
+        : this.output
 
     if (isAbsolute(actualOutput)) {
       return actualOutput
@@ -84,6 +87,7 @@ export abstract class FileEmitter extends CradleEmitterBase {
     }
 
     const pathForModel = this.getFilePathForModel(modelContents.model)
+
     if (this.checkExists(pathForModel, overwrite)) {
       this.writeFileToDisk(modelContents.contents, pathForModel)
     }
@@ -98,6 +102,7 @@ export abstract class FileEmitter extends CradleEmitterBase {
       ensureDirSync(parsed.dir)
 
       let finalContents = contents
+
       switch (this.options.formatting) {
         case 'prettier': {
           finalContents = format(contents, this.options.prettierConfig)
@@ -105,7 +110,7 @@ export abstract class FileEmitter extends CradleEmitterBase {
         }
       }
 
-      writeFileSync(filePath, contents, 'utf8')
+      writeFileSync(filePath, finalContents, 'utf8')
     } catch (err) {
       this.console.warn(`Failed to write ${filePath}`)
     }

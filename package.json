@@ -1,6 +1,6 @@
 {
   "name": "@gatewayapps/cradle-file-emitter",
-  "version": "1.0.1",
+  "version": "1.0.0-alpha.2",
   "description": "Base Cradle File Emitter.",
   "main": "./dist/index.js",
   "scripts": {
@@ -23,7 +23,8 @@
     "typescript": "^3.5.1"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "next"
   },
   "dependencies": {
     "@gatewayapps/cradle": "^1.0.0-alpha.5",
