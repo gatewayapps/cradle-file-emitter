@@ -3,6 +3,7 @@ import { FileEmitterOptionsArgs } from './FileEmitterOptions'
 import path, { join, isAbsolute, normalize } from 'path'
 import { existsSync, writeFileSync, unlinkSync } from 'fs'
 import { ensureDirSync } from 'fs-extra'
+import { format } from 'prettier'
 
 export type ModelFileContents = {
   model: CradleModel
@@ -95,6 +96,15 @@ export abstract class FileEmitter extends CradleEmitterBase {
     }
     try {
       ensureDirSync(parsed.dir)
+
+      let finalContents = contents
+      switch (this.options.formatting) {
+        case 'prettier': {
+          finalContents = format(contents, this.options.prettierConfig)
+          break
+        }
+      }
+
       writeFileSync(filePath, contents, 'utf8')
     } catch (err) {
       this.console.warn(`Failed to write ${filePath}`)
