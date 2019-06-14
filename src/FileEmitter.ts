@@ -2,8 +2,8 @@ import { CradleEmitterBase, IConsole, CradleSchema, CradleModel } from '@gateway
 import { FileEmitterOptionsArgs } from './FileEmitterOptions'
 import path, { join, isAbsolute, normalize } from 'path'
 import { existsSync, writeFileSync, unlinkSync } from 'fs'
-import { ensureDirSync } from 'fs-extra'
-import { format } from 'prettier'
+import { ensureDirSync, createFileSync } from 'fs-extra'
+import { format, getFileInfo, resolveConfig } from 'prettier'
 
 export type ModelFileContents = {
   model: CradleModel
@@ -93,24 +93,35 @@ export abstract class FileEmitter extends CradleEmitterBase {
     }
   }
 
-  private writeFileToDisk(contents: string, filePath: string) {
+  private async writeFileToDisk(contents: string, filePath: string) {
     const parsed = path.parse(filePath)
     if (!parsed.ext) {
       throw new Error(`Output must be to a file.  ${filePath} does not have a file extension`)
     }
     try {
       ensureDirSync(parsed.dir)
+      // createFileSync(filePath)
 
       let finalContents = contents
 
       switch (this.options.formatting) {
         case 'prettier': {
-          finalContents = format(contents, this.options.prettierConfig)
+          const resolvedPrettierConfig = (await resolveConfig(filePath)) || {}
+          const info = await getFileInfo(filePath)
+
+          const optionsConfig = this.options.prettierConfig || {}
+
+          const finalPrettierOptions: any = Object.assign(resolvedPrettierConfig, optionsConfig)
+
+          finalPrettierOptions.parser =
+            finalPrettierOptions.parser || info.inferredParser || 'babel'
+
+          finalContents = format(contents, finalPrettierOptions)
           break
         }
       }
 
-      writeFileSync(filePath, finalContents, 'utf8')
+      writeFileSync(filePath, finalContents, { encoding: 'utf8', flag: '' })
     } catch (err) {
       this.console.warn(`Failed to write ${filePath}`)
     }
