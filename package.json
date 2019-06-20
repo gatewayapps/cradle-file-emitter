@@ -1,6 +1,6 @@
 {
   "name": "@gatewayapps/cradle-file-emitter",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.6",
   "description": "Base Cradle File Emitter.",
   "main": "./dist/index.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "tag": "next"
   },
   "dependencies": {
-    "@gatewayapps/cradle": "^1.0.0-alpha.7",
+    "@gatewayapps/cradle": "^1.0.0-alpha.9",
     "fs-extra": "^8.0.1",
     "prettier": "^1.18.2"
   }
